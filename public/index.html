@@ -551,6 +551,7 @@
             <div class="member-view-controls">
                 <select id="memberSortSelect" aria-label="Sort members" onchange="renderMembers(membersData)">
                     <option value="default">Sort</option>
+                    <option value="solo">Solo Albums</option>
                     <option value="az">A–Z</option>
                     <option value="za">Z–A</option>
                     <option value="age">Age ↓</option>
@@ -993,7 +994,9 @@
                 return;
             }
             const sortOrder = document.getElementById('memberSortSelect').value;
-            const sortedMembers = [...members];
+            const sortedMembers = sortOrder === 'solo'
+                ? members.filter(member => member.soloAlbums?.length > 0)
+                : [...members];
             if (sortOrder === 'az') {
                 sortedMembers.sort((a, b) => a.name.localeCompare(b.name));
             } else if (sortOrder === 'za') {
