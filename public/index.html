@@ -209,6 +209,11 @@
             color: var(--text-sub);
             margin-bottom: 6px;
         }
+        .member-nationality-flag {
+            display: inline;
+            margin-left: 6px;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+        }
         .member-units {
             display: flex;
             flex-wrap: wrap;
@@ -527,6 +532,7 @@
             <button class="tab-btn" data-unit="NCT DREAM" onclick="setUnit('NCT DREAM', this)">NCT DREAM</button>
             <button class="tab-btn" data-unit="NCT U" onclick="setUnit('NCT U', this)">NCT U</button>
             <button class="tab-btn" data-unit="NCT WISH" onclick="setUnit('NCT WISH', this)">NCT WISH</button>
+            <button class="tab-btn" data-unit="WayV" onclick="setUnit('WayV', this)">WayV</button>
         </div>
         <div class="track-count" id="trackCount">Found 0 tracks</div>
     </div>
@@ -534,12 +540,13 @@
     <!-- ================== Members View (standalone) ================== -->
     <div id="membersView">
         <div class="members-view-header">
-            <h2 class="section-title" style="border-bottom:none;margin-bottom:0;">NCT Members</h2>
+            <h2 class="section-title" style="border-bottom:none;margin-bottom:0;">NCT &amp; WayV Members</h2>
             <select id="memberUnitSelect" onchange="fetchMembers()">
                 <option value="ALL">All Members</option>
                 <option value="NCT 127">NCT 127</option>
                 <option value="NCT DREAM">NCT DREAM</option>
                 <option value="NCT WISH">NCT WISH</option>
+                <option value="WayV">WayV</option>
             </select>
         </div>
         <div class="member-count" id="memberCount">Showing 0 members</div>
@@ -887,6 +894,14 @@
             return d.toLocaleDateString('en-GB', opts);
         }
 
+        function getMemberFlag(member) {
+            if (!/^[A-Z]{2}$/.test(member.countryCode || '')) return '';
+            const flag = [...member.countryCode]
+                .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+                .join('');
+            return `<span class="member-nationality-flag" role="img" aria-label="${member.name} flag">${flag}</span>`;
+        }
+
         function renderMembers(members) {
             const grid = document.getElementById('membersGrid');
             const countEl = document.getElementById('memberCount');
@@ -919,7 +934,7 @@
                         ${imgEl}
                         <div class="member-card-info">
                             <div class="member-name">${m.name}${igIcon}${soloIcon}</div>
-                            <div class="member-birthday">🎂 ${formatDate(m.birthDate)}</div>
+                            <div class="member-birthday">🎂 ${formatDate(m.birthDate)}${getMemberFlag(m)}</div>
                             <div class="member-units">${unitBadges}</div>
                         </div>
                     </div>
@@ -944,7 +959,7 @@
             // Name + meta
             document.getElementById('memberModalName').innerText = m.name;
             document.getElementById('memberModalMeta').innerHTML =
-                `🎂 <span class="member-modal-birth-date">${formatDate(m.birthDate)}</span> &nbsp;|&nbsp; <span class="member-modal-age">Age ${m.age}</span>`;
+                `🎂 <span class="member-modal-birth-date">${formatDate(m.birthDate)}</span> &nbsp;|&nbsp; <span class="member-modal-age">Age ${m.age}${getMemberFlag(m)}</span>`;
 
             // Unit badges
             document.getElementById('memberModalUnits').innerHTML =

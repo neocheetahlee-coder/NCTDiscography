@@ -97,12 +97,13 @@ async function fetchAppleMusicData() {
     try {
         // ยิง API แยกตามยูนิต พร้อมบังคับค้นหาจากชื่อศิลปิน (attribute=artistTerm)
         // สำหรับ NCT WISH ให้ดึงจากทั้งสโตร์ไทย (TH) และญี่ปุ่น (JP) เพื่อให้ได้ผลงานครบทั้ง 2 ภาษา
-        const [res127, resDream, resU, resWishTH, resWishJP] = await Promise.all([
+        const [res127, resDream, resU, resWishTH, resWishJP, resWayV] = await Promise.all([
             fetch('https://itunes.apple.com/search?term=nct+127&entity=song&attribute=artistTerm&limit=200&country=TH'),
             fetch('https://itunes.apple.com/search?term=nct+dream&entity=song&attribute=artistTerm&limit=200&country=TH'),
             fetch('https://itunes.apple.com/search?term=nct+u&entity=song&attribute=artistTerm&limit=200&country=TH'),
             fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=TH'),
-            fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=JP')
+            fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=JP'),
+            fetch('https://itunes.apple.com/search?term=wayv&entity=song&attribute=artistTerm&limit=200&country=TH')
         ]);
         
         const data127 = await res127.json();
@@ -110,6 +111,7 @@ async function fetchAppleMusicData() {
         const dataU = await resU.json();
         const dataWishTH = await resWishTH.json();
         const dataWishJP = await resWishJP.json();
+        const dataWayV = await resWayV.json();
         
         // นำข้อมูลทั้งหมดมารวมกัน
         const combinedResults = [
@@ -117,18 +119,22 @@ async function fetchAppleMusicData() {
             ...dataDream.results, 
             ...dataU.results, 
             ...dataWishTH.results,
-            ...dataWishJP.results
+            ...dataWishJP.results,
+            ...dataWayV.results
         ];
         
-        // กรองเอาเฉพาะข้อมูลที่มีชื่อเพลงและอัลบั้มครบ
-       // กรองเอาเฉพาะข้อมูลที่มีชื่อเพลงและอัลบั้มครบ และชื่อศิลปินต้องมีคำว่า NCT
-         const validSongs = combinedResults.filter(item => item.trackName && item.collectionName && item.artistName.toUpperCase().includes('NCT'));
+        // กรองเอาเฉพาะข้อมูลที่มีชื่อเพลงและอัลบั้มครบจาก NCT และ WayV
+        const validSongs = combinedResults.filter(item =>
+            item.trackName &&
+            item.collectionName &&
+            (item.artistName.toUpperCase().includes('NCT') || item.artistName.toUpperCase().includes('WAYV'))
+        );
         
         // ลบข้อมูลที่ซ้ำกันออก (ใช้ trackId เป็นตัวกรองหลัก)
         allSongs = Array.from(new Map(validSongs.map(item => [item.trackId, item])).values());
         
         songDB.buildIndex(allSongs); 
-        console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP)`);
+        console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP, WayV)`);
     } catch (error) {
         console.error("API Error:", error);
     }
