@@ -441,6 +441,12 @@
         .members-view-header h2 {
             margin: 0;
         }
+        .member-view-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #memberSortSelect,
         #memberUnitSelect {
             background: linear-gradient(135deg, rgba(31,217,52,0.85), rgba(14,177,42,0.82));
             color: #000;
@@ -457,6 +463,7 @@
             transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
             outline: none;
         }
+        #memberSortSelect:hover,
         #memberUnitSelect:hover {
             transform: scale(1.04);
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 12px 28px rgba(31,217,52,0.28);
@@ -541,13 +548,22 @@
     <div id="membersView">
         <div class="members-view-header">
             <h2 class="section-title" style="border-bottom:none;margin-bottom:0;">NCT &amp; WayV Members</h2>
-            <select id="memberUnitSelect" onchange="fetchMembers()">
-                <option value="ALL">All Members</option>
-                <option value="NCT 127">NCT 127</option>
-                <option value="NCT DREAM">NCT DREAM</option>
-                <option value="NCT WISH">NCT WISH</option>
-                <option value="WayV">WayV</option>
-            </select>
+            <div class="member-view-controls">
+                <select id="memberSortSelect" aria-label="Sort members" onchange="renderMembers(membersData)">
+                    <option value="default">Sort</option>
+                    <option value="az">A–Z</option>
+                    <option value="za">Z–A</option>
+                    <option value="age">Age ↓</option>
+                    <option value="age-asc">Age ↑</option>
+                </select>
+                <select id="memberUnitSelect" onchange="fetchMembers()">
+                    <option value="ALL">All Members</option>
+                    <option value="NCT 127">NCT 127</option>
+                    <option value="NCT DREAM">NCT DREAM</option>
+                    <option value="NCT WISH">NCT WISH</option>
+                    <option value="WayV">WayV</option>
+                </select>
+            </div>
         </div>
         <div class="member-count" id="memberCount">Showing 0 members</div>
         <div class="members-grid" id="membersGrid"></div>
@@ -910,8 +926,19 @@
                 if (countEl) countEl.innerText = 'Showing 0 members';
                 return;
             }
-            if (countEl) countEl.innerText = `Showing ${members.length} member${members.length > 1 ? 's' : ''}`;
-            grid.innerHTML = members.map(m => {
+            const sortOrder = document.getElementById('memberSortSelect').value;
+            const sortedMembers = [...members];
+            if (sortOrder === 'az') {
+                sortedMembers.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortOrder === 'za') {
+                sortedMembers.sort((a, b) => b.name.localeCompare(a.name));
+            } else if (sortOrder === 'age') {
+                sortedMembers.sort((a, b) => b.age - a.age || a.name.localeCompare(b.name));
+            } else if (sortOrder === 'age-asc') {
+                sortedMembers.sort((a, b) => a.age - b.age || a.name.localeCompare(b.name));
+            }
+            if (countEl) countEl.innerText = `Showing ${sortedMembers.length} member${sortedMembers.length > 1 ? 's' : ''}`;
+            grid.innerHTML = sortedMembers.map(m => {
                 const unitBadges = m.units.map(u =>
                     `<span class="member-unit-badge">${u}</span>`
                 ).join('');
