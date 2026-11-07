@@ -280,6 +280,10 @@
             margin-bottom: 10px;
             line-height: 1.6;
         }
+        body:not(.dark-mode) .member-modal-birth-date,
+        body:not(.dark-mode) .member-modal-age {
+            color: #ffffff;
+        }
         .member-modal-units { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px; }
 
         /* IG + Solo section */
@@ -314,6 +318,10 @@
             letter-spacing: 0.08em;
             color: var(--text-sub);
             margin-bottom: 8px;
+        }
+        body:not(.dark-mode) .member-birthday,
+        body:not(.dark-mode) .solo-section-title {
+            color: #ffffff;
         }
         .solo-album-card {
             display: flex;
@@ -934,7 +942,7 @@
             // Name + meta
             document.getElementById('memberModalName').innerText = m.name;
             document.getElementById('memberModalMeta').innerHTML =
-                `🎂 ${formatDate(m.birthDate)} &nbsp;|&nbsp; Age ${m.age}`;
+                `🎂 <span class="member-modal-birth-date">${formatDate(m.birthDate)}</span> &nbsp;|&nbsp; <span class="member-modal-age">Age ${m.age}</span>`;
 
             // Unit badges
             document.getElementById('memberModalUnits').innerHTML =
