@@ -1,0 +1,259 @@
+[
+  {
+    "id": 1,
+    "name": "Johnny",
+    "birthDate": "1995-02-09",
+    "birthYear": 1995,
+    "age": 31,
+    "units": ["NCT 127"],
+    "image": "images/members/johnny.jpg",
+    "instagram": "johnnyjsuh",
+    "soloAlbums": []
+  },
+  {
+    "id": 2,
+    "name": "Taeyong",
+    "birthDate": "1995-07-01",
+    "birthYear": 1995,
+    "age": 31,
+    "units": ["NCT 127"],
+    "image": "images/members/taeyong.jpg",
+    "instagram": "taeoxo_nct",
+    "soloAlbums": [
+      {
+        "albumTitle": "SHALALA - The 1st Mini Album",
+        "releaseYear": 2023,
+        "titleTrack": "SHALALA",
+        "appleMusicUrl": "https://music.apple.com/th/album/shalala-the-1st-mini-album/1689269527"
+      },
+      {
+        "albumTitle": "TAP - The 2nd Mini Album",
+        "releaseYear": 2024,
+        "titleTrack": "TAP",
+        "appleMusicUrl": "https://music.apple.com/th/album/tap-the-2nd-mini-album-ep/1729606132"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Yuta",
+    "birthDate": "1995-10-26",
+    "birthYear": 1995,
+    "age": 31,
+    "units": ["NCT 127"],
+    "image": "images/members/yuta.jpg",
+    "instagram": "yuu_taa_1026",
+    "soloAlbums": [
+      {
+        "albumTitle": "Depth - Special Single / Mini",
+        "releaseYear": 2024,
+        "titleTrack": "Off The Mask",
+        "appleMusicUrl": "https://music.apple.com/th/artist/yuta/1749558988"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Doyoung",
+    "birthDate": "1996-02-01",
+    "birthYear": 1996,
+    "age": 30,
+    "units": ["NCT 127"],
+    "image": "images/members/doyoung.jpg",
+    "instagram": "do0_nct",
+    "soloAlbums": [
+      {
+        "albumTitle": "YOUTH - The 1st Album",
+        "releaseYear": 2024,
+        "titleTrack": "Little Light",
+        "appleMusicUrl": "https://music.apple.com/th/album/youth-the-1st-album/1740922894"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Jaehyun",
+    "birthDate": "1997-02-14",
+    "birthYear": 1997,
+    "age": 29,
+    "units": ["NCT 127"],
+    "image": "images/members/jaehyun.jpg",
+    "instagram": "_jeongjaehyun",
+    "soloAlbums": [
+      {
+        "albumTitle": "J - The 1st Album",
+        "releaseYear": 2024,
+        "titleTrack": "Smoke",
+        "appleMusicUrl": "https://music.apple.com/th/album/j-the-1st-album/1763134637"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Jungwoo",
+    "birthDate": "1998-02-19",
+    "birthYear": 1998,
+    "age": 28,
+    "units": ["NCT 127"],
+    "image": "images/members/jungwoo.jpg",
+    "instagram": "sugaringcandy",
+    "soloAlbums": []
+  },
+  {
+    "id": 7,
+    "name": "Mark",
+    "birthDate": "1999-08-02",
+    "birthYear": 1999,
+    "age": 27,
+    "units": ["NCT 127", "NCT DREAM"],
+    "image": "images/members/mark.jpg",
+    "instagram": "onyourm__ark",
+    "soloAlbums": [
+        {
+        "albumTitle": "The Firstfruit - The 1st Album",
+        "releaseYear": 2025,
+        "titleTrack": "The Firstfruit",
+        "appleMusicUrl": "https://music.apple.com/th/album/the-firstfruit-the-1st-album/1804768478?l=th"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Haechan",
+    "birthDate": "2000-06-06",
+    "birthYear": 2000,
+    "age": 26,
+    "units": ["NCT 127", "NCT DREAM"],
+    "image": "images/members/haechan.jpg",
+    "instagram": "haechanahceah",
+    "soloAlbums": [
+      {
+        "albumTitle": "TASTE - The 1st Album",
+        "releaseYear": 2025,
+        "titleTrack": "TASTE",
+        "appleMusicUrl": "https://music.apple.com/th/album/taste-the-1st-album/1835578137?l=th"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Renjun",
+    "birthDate": "2000-03-23",
+    "birthYear": 2000,
+    "age": 26,
+    "units": ["NCT DREAM"],
+    "image": "images/members/renjun.jpg",
+    "instagram": "yellow_3to3",
+    "soloAlbums": []
+  },
+  {
+    "id": 10,
+    "name": "Jeno",
+    "birthDate": "2000-04-23",
+    "birthYear": 2000,
+    "age": 26,
+    "units": ["NCT DREAM"],
+    "image": "images/members/jeno.jpg",
+    "instagram": "leejen_o_423",
+    "soloAlbums": []
+  },
+  {
+    "id": 11,
+    "name": "Jaemin",
+    "birthDate": "2000-08-13",
+    "birthYear": 2000,
+    "age": 26,
+    "units": ["NCT DREAM"],
+    "image": "images/members/jaemin.jpg",
+    "instagram": "na.jaemin0813",
+    "soloAlbums": []
+  },
+  {
+    "id": 12,
+    "name": "Chenle",
+    "birthDate": "2001-11-22",
+    "birthYear": 2001,
+    "age": 24,
+    "units": ["NCT DREAM"],
+    "image": "images/members/chenle.jpg",
+    "instagram": "kh1000le",
+    "soloAlbums": []
+  },
+  {
+    "id": 13,
+    "name": "Jisung",
+    "birthDate": "2002-02-05",
+    "birthYear": 2002,
+    "age": 24,
+    "units": ["NCT DREAM"],
+    "image": "images/members/jisung.jpg",
+    "instagram": "the__and.y",
+    "soloAlbums": []
+  },
+  {
+    "id": 14,
+    "name": "Sion",
+    "birthDate": "2002-05-11",
+    "birthYear": 2002,
+    "age": 24,
+    "units": ["NCT WISH"],
+    "image": "images/members/sion.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  },
+  {
+    "id": 15,
+    "name": "Riku",
+    "birthDate": "2003-06-28",
+    "birthYear": 2003,
+    "age": 23,
+    "units": ["NCT WISH"],
+    "image": "images/members/riku.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  },
+  {
+    "id": 16,
+    "name": "Yushi",
+    "birthDate": "2004-04-05",
+    "birthYear": 2004,
+    "age": 22,
+    "units": ["NCT WISH"],
+    "image": "images/members/yushi.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  },
+  {
+    "id": 17,
+    "name": "Jaehee",
+    "birthDate": "2005-06-21",
+    "birthYear": 2005,
+    "age": 21,
+    "units": ["NCT WISH"],
+    "image": "images/members/jaehee.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  },
+  {
+    "id": 18,
+    "name": "Ryo",
+    "birthDate": "2007-08-04",
+    "birthYear": 2007,
+    "age": 19,
+    "units": ["NCT WISH"],
+    "image": "images/members/ryo.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  },
+  {
+    "id": 19,
+    "name": "Sakuya",
+    "birthDate": "2007-11-18",
+    "birthYear": 2007,
+    "age": 18,
+    "units": ["NCT WISH"],
+    "image": "images/members/sakuya.jpg",
+    "instagram": null,
+    "soloAlbums": []
+  }
+]
