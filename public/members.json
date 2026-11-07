@@ -21,18 +21,20 @@
     "units": ["NCT 127"],
     "image": "images/members/taeyong.jpg",
     "instagram": "taeoxo_nct",
+    "appleMusic": {
+      "artistId": "929035184",
+      "artistUrl": "https://music.apple.com/th/artist/taeyong/929035184"
+    },
     "soloAlbums": [
       {
         "albumTitle": "SHALALA - The 1st Mini Album",
         "releaseYear": 2023,
-        "titleTrack": "SHALALA",
-        "appleMusicUrl": "https://music.apple.com/th/album/shalala-the-1st-mini-album/1689269527"
+        "titleTrack": "SHALALA"
       },
       {
         "albumTitle": "TAP - The 2nd Mini Album",
         "releaseYear": 2024,
-        "titleTrack": "TAP",
-        "appleMusicUrl": "https://music.apple.com/th/album/tap-the-2nd-mini-album-ep/1729606132"
+        "titleTrack": "TAP"
       }
     ]
   },
@@ -46,12 +48,15 @@
     "units": ["NCT 127"],
     "image": "images/members/yuta.jpg",
     "instagram": "yuu_taa_1026",
+    "appleMusic": {
+      "artistId": "1658021468",
+      "artistUrl": "https://music.apple.com/th/artist/yuta/1658021468"
+    },
     "soloAlbums": [
       {
         "albumTitle": "Depth - Special Single / Mini",
         "releaseYear": 2024,
-        "titleTrack": "Off The Mask",
-        "appleMusicUrl": "https://music.apple.com/th/artist/yuta/1749558988"
+        "titleTrack": "Off The Mask"
       }
     ]
   },
@@ -65,12 +70,15 @@
     "units": ["NCT 127"],
     "image": "images/members/doyoung.jpg",
     "instagram": "do0_nct",
+    "appleMusic": {
+      "artistId": "1132510526",
+      "artistUrl": "https://music.apple.com/th/artist/doyoung/1132510526"
+    },
     "soloAlbums": [
       {
         "albumTitle": "YOUTH - The 1st Album",
         "releaseYear": 2024,
-        "titleTrack": "Little Light",
-        "appleMusicUrl": "https://music.apple.com/th/album/youth-the-1st-album/1740922894"
+        "titleTrack": "Little Light"
       }
     ]
   },
@@ -84,12 +92,15 @@
     "units": ["NCT 127"],
     "image": "images/members/jaehyun.jpg",
     "instagram": "_jeongjaehyun",
+    "appleMusic": {
+      "artistId": "1316867454",
+      "artistUrl": "https://music.apple.com/th/artist/jaehyun/1316867454"
+    },
     "soloAlbums": [
       {
         "albumTitle": "J - The 1st Album",
         "releaseYear": 2024,
-        "titleTrack": "Smoke",
-        "appleMusicUrl": "https://music.apple.com/th/album/j-the-1st-album/1763134637"
+        "titleTrack": "Smoke"
       }
     ]
   },
@@ -115,12 +126,15 @@
     "units": ["NCT 127", "NCT DREAM"],
     "image": "images/members/mark.jpg",
     "instagram": "onyourm__ark",
+    "appleMusic": {
+      "artistId": "1256529606",
+      "artistUrl": "https://music.apple.com/th/artist/mark/1256529606"
+    },
     "soloAlbums": [
       {
-        "albumTitle": "The Firstfruit - The 1st Album",
-        "releaseYear": 2025,
-        "titleTrack": "The Firstfruit",
-        "appleMusicUrl": "https://music.apple.com/th/album/the-firstfruit-the-1st-album/1804768478?l=th"
+      "albumTitle": "The Firstfruit - The 1st Album",
+      "releaseYear": 2025,
+      "titleTrack": "The Firstfruit"
       }
     ]
   },
@@ -134,12 +148,15 @@
     "units": ["NCT 127", "NCT DREAM"],
     "image": "images/members/haechan.jpg",
     "instagram": "haechanahceah",
+    "appleMusic": {
+      "artistId": "1358388880",
+      "artistUrl": "https://music.apple.com/th/artist/haechan/1358388880"
+    },
     "soloAlbums": [
       {
         "albumTitle": "TASTE - The 1st Album",
         "releaseYear": 2025,
-        "titleTrack": "TASTE",
-        "appleMusicUrl": "https://music.apple.com/th/album/taste-the-1st-album/1835578137?l=th"
+        "titleTrack": "TASTE"
       }
     ]
   },
@@ -297,12 +314,15 @@
     "units": ["WayV"],
     "image": "images/members/ten.jpg",
     "instagram": "https://www.instagram.com/tenlee_1001",
+    "appleMusic": {
+      "artistId": "1515958292",
+      "artistUrl": "https://music.apple.com/th/artist/ten/1515958292"
+    },
     "soloAlbums": [
       {
         "albumTitle": "TEN - The 1st Mini Album",
         "releaseYear": 2024,
-        "titleTrack": "Nightwalker",
-        "appleMusicUrl": "https://music.apple.com/th/album/ten-the-1st-mini-album-ep/1728248443"
+        "titleTrack": "Nightwalker"
       }
     ]
   },

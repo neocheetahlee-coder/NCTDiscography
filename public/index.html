@@ -896,6 +896,7 @@
 
         // ================== Members Logic (standalone view) ==================
         let membersData = []; // เก็บข้อมูลสำหรับเปิด modal
+        let activeMemberId = null;
 
         async function fetchMembers() {
             const unitParam = document.getElementById('memberUnitSelect').value;
@@ -916,6 +917,71 @@
                 .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
                 .join('');
             return `<span class="member-nationality-flag" role="img" aria-label="${member.name} flag">${flag}</span>`;
+        }
+
+        function renderMemberLinks(member, albums, albumLoadError = false) {
+            const linksEl = document.getElementById('memberModalLinks');
+            let linksHTML = '';
+
+            if (member.instagram) {
+                const instagramUrl = /^https?:\/\//i.test(member.instagram)
+                    ? member.instagram
+                    : `https://www.instagram.com/${encodeURIComponent(member.instagram)}`;
+                const instagramUsername = member.instagram.replace(/\/+$/, '').split('/').pop();
+                linksHTML += `
+                    <a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="ig-btn">
+                        <i class="fa-brands fa-instagram"></i>
+                        @${instagramUsername}
+                    </a>`;
+            }
+
+            if (member.soloAlbums?.length) {
+                linksHTML += `<div class="solo-section-title"><i class="fa-brands fa-apple" style="color:var(--apple-red);"></i> Solo Albums</div>`;
+                if (albumLoadError) {
+                    linksHTML += `<p style="color:var(--text-sub);font-size:13px;font-family:'Geist Mono',monospace;">Could not load Solo Albums. Please try again.</p>`;
+                } else if (albums.length) {
+                    linksHTML += albums.map(album => `
+                        <div class="solo-album-card">
+                            <div class="solo-album-info">
+                                <div class="solo-album-title">${album.albumTitle}</div>
+                                <div class="solo-album-track">▶ ${album.titleTrack} &middot; ${album.releaseYear}</div>
+                            </div>
+                            <a href="${album.appleMusicUrl}" target="_blank" rel="noopener noreferrer" class="solo-apple-btn">
+                                <i class="fa-brands fa-apple"></i> Listen
+                            </a>
+                        </div>`).join('');
+                } else {
+                    linksHTML += `<p style="color:var(--text-sub);font-size:13px;font-family:'Geist Mono',monospace;">No Solo Albums found in Apple Music.</p>`;
+                }
+            }
+
+            if (!linksHTML) {
+                linksHTML = `<p style="color:var(--text-sub);font-size:13px;font-family:'Geist Mono',monospace;">No social links available.</p>`;
+            }
+            linksEl.innerHTML = linksHTML;
+        }
+
+        async function loadMemberLinks(member) {
+            const linksEl = document.getElementById('memberModalLinks');
+            if (!member.soloAlbums?.length) {
+                renderMemberLinks(member, []);
+                return;
+            }
+
+            linksEl.innerHTML = `<div class="solo-section-title"><i class="fa-brands fa-apple" style="color:var(--apple-red);"></i> Solo Albums</div><p style="color:var(--text-sub);font-size:13px;font-family:'Geist Mono',monospace;">Loading albums...</p>`;
+            try {
+                const response = await fetch(`/api/members/${encodeURIComponent(member.id)}/solo-albums`);
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || `Request failed with status ${response.status}`);
+                }
+                if (activeMemberId !== member.id || !document.getElementById('memberModal').classList.contains('active')) return;
+                renderMemberLinks(member, data.albums);
+            } catch (error) {
+                console.error(`Could not load solo albums for ${member.name}:`, error);
+                if (activeMemberId !== member.id || !document.getElementById('memberModal').classList.contains('active')) return;
+                renderMemberLinks(member, [], true);
+            }
         }
 
         function renderMembers(members) {
@@ -973,6 +1039,7 @@
         function openMemberModal(memberId) {
             const m = membersData.find(x => x.id === memberId);
             if (!m) return;
+            activeMemberId = m.id;
 
             // Photo
             const photoWrap = document.getElementById('memberModalPhotoWrap');
@@ -992,47 +1059,14 @@
             document.getElementById('memberModalUnits').innerHTML =
                 m.units.map(u => `<span class="member-unit-badge">${u}</span>`).join('');
 
-            // Links section
-            const linksEl = document.getElementById('memberModalLinks');
-            let linksHTML = '';
-
-            // Instagram
-            if (m.instagram) {
-                linksHTML += `
-                    <a href="https://www.instagram.com/${m.instagram}" target="_blank" class="ig-btn">
-                        <i class="fa-brands fa-instagram"></i>
-                        @${m.instagram}
-                    </a>`;
-            }
-
-            // Solo Albums
-            if (m.soloAlbums && m.soloAlbums.length > 0) {
-                linksHTML += `<div class="solo-section-title"><i class="fa-brands fa-apple" style="color:var(--apple-red);"></i> Solo Albums</div>`;
-                m.soloAlbums.forEach(album => {
-                    linksHTML += `
-                        <div class="solo-album-card">
-                            <div class="solo-album-info">
-                                <div class="solo-album-title">${album.albumTitle}</div>
-                                <div class="solo-album-track">▶ ${album.titleTrack} &middot; ${album.releaseYear}</div>
-                            </div>
-                            <a href="${album.appleMusicUrl}" target="_blank" class="solo-apple-btn">
-                                <i class="fa-brands fa-apple"></i> Listen
-                            </a>
-                        </div>`;
-                });
-            }
-
-            if (!linksHTML) {
-                linksHTML = `<p style="color:var(--text-sub);font-size:13px;font-family:'Geist Mono',monospace;">No social links available.</p>`;
-            }
-            linksEl.innerHTML = linksHTML;
-
             document.getElementById('memberModal').classList.add('active');
+            loadMemberLinks(m);
         }
 
         function closeMemberModal(force = false) {
             if (force === true || (event && event.target.id === 'memberModal')) {
                 document.getElementById('memberModal').classList.remove('active');
+                activeMemberId = null;
             }
         }
 

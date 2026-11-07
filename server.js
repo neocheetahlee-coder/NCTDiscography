@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path'); // <-- เพิ่มบรรทัดนี้เข้ามาเพื่อเรียกใช้ระบบค้นหาโฟลเดอร์
 const app = express();
 const PORT = 3000;
@@ -142,7 +143,6 @@ async function fetchAppleMusicData() {
 
 // Endpoint ดึงข้อมูลสมาชิก NCT จาก members.json
 app.get('/api/members', (req, res) => {
-    const fs = require('fs');
     const membersPath = path.join(__dirname, 'public', 'members.json');
     try {
         const data = fs.readFileSync(membersPath, 'utf8');
@@ -156,6 +156,76 @@ app.get('/api/members', (req, res) => {
     } catch (err) {
         console.error('Error reading members.json:', err);
         res.status(500).json({ error: 'Could not load members data' });
+    }
+});
+
+app.get('/api/members/:id/solo-albums', async (req, res) => {
+    const memberId = Number(req.params.id);
+    if (!Number.isInteger(memberId)) {
+        return res.status(400).json({ error: 'Invalid member ID' });
+    }
+
+    try {
+        const membersPath = path.join(__dirname, 'public', 'members.json');
+        const members = JSON.parse(fs.readFileSync(membersPath, 'utf8'));
+        const member = members.find(item => item.id === memberId);
+        if (!member) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
+
+        if (!member.soloAlbums?.length || !member.appleMusic?.artistId) {
+            return res.json({ albums: [] });
+        }
+
+        const lookupUrl = new URL('https://itunes.apple.com/lookup');
+        lookupUrl.searchParams.set('id', member.appleMusic.artistId);
+        lookupUrl.searchParams.set('entity', 'album');
+        lookupUrl.searchParams.set('country', 'th');
+
+        const response = await fetch(lookupUrl);
+        if (!response.ok) {
+            throw new Error(`iTunes Lookup returned HTTP ${response.status}`);
+        }
+
+        const catalog = await response.json();
+        if (catalog.errorMessage) {
+            throw new Error(`iTunes Lookup error: ${catalog.errorMessage}`);
+        }
+
+        const normalizeTitle = title => title.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const artistName = member.name.toLowerCase();
+        const catalogAlbums = (catalog.results || []).filter(item =>
+            item.wrapperType === 'collection' &&
+            item.artistName?.toLowerCase() === artistName &&
+            item.collectionName &&
+            item.collectionViewUrl
+        );
+
+        const albums = member.soloAlbums.flatMap(album => {
+            const expectedTitle = normalizeTitle(album.albumTitle);
+            const match = catalogAlbums.find(item => {
+                const catalogTitle = normalizeTitle(item.collectionName);
+                return catalogTitle === expectedTitle ||
+                    catalogTitle.startsWith(expectedTitle) ||
+                    expectedTitle.startsWith(catalogTitle);
+            });
+            if (!match) return [];
+
+            const releaseYear = match.releaseDate
+                ? new Date(match.releaseDate).getFullYear()
+                : album.releaseYear;
+            return [{
+                albumTitle: match.collectionName,
+                releaseYear: Number.isNaN(releaseYear) ? album.releaseYear : releaseYear,
+                titleTrack: album.titleTrack,
+                appleMusicUrl: match.collectionViewUrl
+            }];
+        });
+
+        res.json({ albums });
+    } catch (error) {
+        console.error(`Error loading solo albums for member ${memberId}:`, error);
+        res.status(502).json({ error: 'Could not load solo albums from Apple Music' });
     }
 });
 
