@@ -12,14 +12,9 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
-      // รูปสมาชิกยังอยู่ใน public/ ที่ root และถูกเสิร์ฟโดย Express
-      '/images': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
     },
   },
   build: {
-    outDir: 'dist', // output สำหรับ production (server.js จะ serve จาก client/dist)
+    outDir: 'dist',
   },
 })

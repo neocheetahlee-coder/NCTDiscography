@@ -1,20 +1,14 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const members = require('./members.json');
 
 app.use(express.json());
-
-// เสิร์ฟ public/ เสมอ (รูปสมาชิก, members.json ฯลฯ)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Production: เสิร์ฟ React build จาก client/dist
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'client', 'dist')));
-}
+module.exports = app;
 
 let allSongs = [];
+let songsLoaded = false;
+let songLoadPromise = null;
 
 // ==========================================
 // DSA 1: HASH TABLE (สำหรับระบบค้นหา)
@@ -101,68 +95,70 @@ function customSort(arr, type) {
 // ดึงข้อมูลและจัดการ Routing
 // ==========================================
 async function fetchAppleMusicData() {
-    try {
-        // ยิง API แยกตามยูนิต พร้อมบังคับค้นหาจากชื่อศิลปิน (attribute=artistTerm)
-        // สำหรับ NCT WISH ให้ดึงจากทั้งสโตร์ไทย (TH) และญี่ปุ่น (JP) เพื่อให้ได้ผลงานครบทั้ง 2 ภาษา
-        const [res127, resDream, resU, resWishTH, resWishJP, resWayV] = await Promise.all([
-            fetch('https://itunes.apple.com/search?term=nct+127&entity=song&attribute=artistTerm&limit=200&country=TH'),
-            fetch('https://itunes.apple.com/search?term=nct+dream&entity=song&attribute=artistTerm&limit=200&country=TH'),
-            fetch('https://itunes.apple.com/search?term=nct+u&entity=song&attribute=artistTerm&limit=200&country=TH'),
-            fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=TH'),
-            fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=JP'),
-            fetch('https://itunes.apple.com/search?term=wayv&entity=song&attribute=artistTerm&limit=200&country=TH')
-        ]);
-        
-        const data127 = await res127.json();
-        const dataDream = await resDream.json();
-        const dataU = await resU.json();
-        const dataWishTH = await resWishTH.json();
-        const dataWishJP = await resWishJP.json();
-        const dataWayV = await resWayV.json();
-        
-        // นำข้อมูลทั้งหมดมารวมกัน
-        const combinedResults = [
-            ...data127.results, 
-            ...dataDream.results, 
-            ...dataU.results, 
-            ...dataWishTH.results,
-            ...dataWishJP.results,
-            ...dataWayV.results
-        ];
-        
-        // กรองเอาเฉพาะข้อมูลที่มีชื่อเพลงและอัลบั้มครบจาก NCT และ WayV
-        const validSongs = combinedResults.filter(item =>
-            item.trackName &&
-            item.collectionName &&
-            (item.artistName.toUpperCase().includes('NCT') || item.artistName.toUpperCase().includes('WAYV'))
-        );
-        
-        // ลบข้อมูลที่ซ้ำกันออก (ใช้ trackId เป็นตัวกรองหลัก)
-        allSongs = Array.from(new Map(validSongs.map(item => [item.trackId, item])).values());
-        
-        songDB.buildIndex(allSongs); 
-        console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP)`);
-    } catch (error) {
-        console.error("API Error:", error);
+    // Load each NCT unit in its existing store; WISH includes both Thai and Japanese catalogs.
+    const responses = await Promise.all([
+        fetch('https://itunes.apple.com/search?term=nct+127&entity=song&attribute=artistTerm&limit=200&country=TH'),
+        fetch('https://itunes.apple.com/search?term=nct+dream&entity=song&attribute=artistTerm&limit=200&country=TH'),
+        fetch('https://itunes.apple.com/search?term=nct+u&entity=song&attribute=artistTerm&limit=200&country=TH'),
+        fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=TH'),
+        fetch('https://itunes.apple.com/search?term=nct+wish&entity=song&attribute=artistTerm&limit=200&country=JP'),
+        fetch('https://itunes.apple.com/search?term=wayv&entity=song&attribute=artistTerm&limit=200&country=TH')
+    ]);
+
+    for (const response of responses) {
+        if (!response.ok) {
+            throw new Error(`iTunes Search returned HTTP ${response.status}`);
+        }
     }
+
+    const catalogs = await Promise.all(responses.map(response => response.json()));
+    if (catalogs.some(catalog => !Array.isArray(catalog.results))) {
+        throw new Error('iTunes Search returned an invalid response');
+    }
+
+    const combinedResults = catalogs.flatMap(catalog => catalog.results);
+    const validSongs = combinedResults.filter(item =>
+        item.trackName &&
+        item.collectionName &&
+        (item.artistName.toUpperCase().includes('NCT') || item.artistName.toUpperCase().includes('WAYV'))
+    );
+
+    allSongs = Array.from(new Map(validSongs.map(item => [item.trackId, item])).values());
+    songDB.buildIndex(allSongs);
+    songsLoaded = true;
+    console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP)`);
 }
+
+function ensureSongsLoaded() {
+    if (songsLoaded) return Promise.resolve();
+    if (!songLoadPromise) {
+        songLoadPromise = fetchAppleMusicData().catch(error => {
+            songLoadPromise = null;
+            throw error;
+        });
+    }
+    return songLoadPromise;
+}
+
+// Prime the song catalog on the first API call; failures are retried on the next request.
+app.use('/api', async (req, res, next) => {
+    try {
+        await ensureSongsLoaded();
+        next();
+    } catch (error) {
+        console.error('Could not initialize the song catalog:', error);
+        res.status(502).json({ error: 'Could not load song data from Apple Music' });
+    }
+});
 
 // Endpoint ดึงข้อมูลสมาชิก NCT จาก members.json
 app.get('/api/members', (req, res) => {
-    const membersPath = path.join(__dirname, 'public', 'members.json');
-    try {
-        const data = fs.readFileSync(membersPath, 'utf8');
-        const members = JSON.parse(data);
-        const { unit } = req.query;
-        if (unit && unit !== 'ALL') {
-            const filtered = members.filter(m => m.units.some(u => u.toUpperCase() === unit.toUpperCase()));
-            return res.json(filtered);
-        }
-        res.json(members);
-    } catch (err) {
-        console.error('Error reading members.json:', err);
-        res.status(500).json({ error: 'Could not load members data' });
+    const { unit } = req.query;
+    if (unit && unit !== 'ALL') {
+        const filtered = members.filter(m => m.units.some(u => u.toUpperCase() === unit.toUpperCase()));
+        return res.json(filtered);
     }
+    res.json(members);
 });
 
 app.get('/api/members/:id/solo-albums', async (req, res) => {
@@ -172,8 +168,6 @@ app.get('/api/members/:id/solo-albums', async (req, res) => {
     }
 
     try {
-        const membersPath = path.join(__dirname, 'public', 'members.json');
-        const members = JSON.parse(fs.readFileSync(membersPath, 'utf8'));
         const member = members.find(item => item.id === memberId);
         if (!member) {
             return res.status(404).json({ error: 'Member not found' });
@@ -261,17 +255,6 @@ app.get('/api/songs', (req, res) => {
     res.json({ top3, songs: results });
 });
 
-// Production catch-all: ส่ง React index.html สำหรับทุก route ที่ไม่ใช่ API
-// Express 5 ใช้ /{*splat} แทน * เพื่อรองรับ path ที่มี slash ซ้อน
-if (process.env.NODE_ENV === 'production') {
-    app.get('/{*splat}', (req, res) => {
-        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-    });
-}
-
-// เริ่มเซิร์ฟเวอร์
-fetchAppleMusicData().then(() => {
+if (require.main === module) {
     app.listen(PORT, () => console.log(`🚀 พร้อมใช้งานที่ http://localhost:${PORT}`));
-});
-
-module.exports = app;
+}
