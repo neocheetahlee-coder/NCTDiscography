@@ -1,5 +1,17 @@
 {
+  "name": "nct-discography",
+  "version": "1.0.0",
+  "description": "NCT Discography & Sub-unit Explorer",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"node server.js\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "NODE_ENV=production node server.js"
+  },
   "dependencies": {
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

@@ -1,13 +1,19 @@
 const express = require('express');
 const fs = require('fs');
-const path = require('path'); // <-- เพิ่มบรรทัดนี้เข้ามาเพื่อเรียกใช้ระบบค้นหาโฟลเดอร์
+const path = require('path');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // <-- แก้บรรทัดนี้ให้ระบุพาธแบบเต็ม
 
-const API_URL = 'https://itunes.apple.com/search?term=nct&entity=song&limit=200';
+// เสิร์ฟ public/ เสมอ (รูปสมาชิก, members.json ฯลฯ)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Production: เสิร์ฟ React build จาก client/dist
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'client', 'dist')));
+}
+
 let allSongs = [];
 
 // ==========================================
@@ -135,7 +141,7 @@ async function fetchAppleMusicData() {
         allSongs = Array.from(new Map(validSongs.map(item => [item.trackId, item])).values());
         
         songDB.buildIndex(allSongs); 
-        console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP, WayV)`);
+        console.log(`✅ โหลดข้อมูลสำเร็จ (${allSongs.length} เพลง จาก 127, DREAM, U, WISH ทั้ง TH และ JP)`);
     } catch (error) {
         console.error("API Error:", error);
     }
@@ -255,8 +261,17 @@ app.get('/api/songs', (req, res) => {
     res.json({ top3, songs: results });
 });
 
+// Production catch-all: ส่ง React index.html สำหรับทุก route ที่ไม่ใช่ API
+// Express 5 ใช้ /{*splat} แทน * เพื่อรองรับ path ที่มี slash ซ้อน
+if (process.env.NODE_ENV === 'production') {
+    app.get('/{*splat}', (req, res) => {
+        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+    });
+}
+
 // เริ่มเซิร์ฟเวอร์
 fetchAppleMusicData().then(() => {
     app.listen(PORT, () => console.log(`🚀 พร้อมใช้งานที่ http://localhost:${PORT}`));
-    module.exports = app;
 });
+
+module.exports = app;

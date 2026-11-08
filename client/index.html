@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NCT Discography &amp; Sub-unit Explorer</title>
+
+    <!--
+      ตัดออก: "Geist Pixel" — ไม่มีอยู่จริงใน Google Fonts Catalog
+      ผลลัพธ์จาก Google Fonts: 404 (font not found)
+      แทนที่ด้วย Geist Mono (ซึ่งมีอยู่จริงและใช้กับ marquee เหมือนเดิม)
+
+      รวม preconnect เป็นชุดเดียว + ดึงฟอนต์ทั้ง 4 ด้วย request เดียว:
+        Archivo Black  — header, section-title, member modal name
+        Urbanist       — subtitle italic
+        Geist Mono     — monospace ทั่วไป, tab-btn, marquee
+        Ubuntu         — member name, solo album title
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Urbanist:ital,wght@0,500;1,600&family=Geist+Mono:wght@400&family=Ubuntu:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome 6.4.0 (cdnjs) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
