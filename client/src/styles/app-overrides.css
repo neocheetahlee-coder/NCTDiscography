@@ -101,3 +101,22 @@
   color: #c62828;
   margin: 0 40px 12px;
 }
+
+.highlights-message {
+  color: var(--text-sub);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  margin: 0 0 20px;
+}
+
+.highlights-error {
+  color: #c62828;
+}
+
+.highlights-container-hidden {
+  display: none;
+}
+
+.container.highlights-container {
+  padding-bottom: 0;
+}

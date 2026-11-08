@@ -9,6 +9,7 @@ import {
   SongModal,
   UnitTabs,
 } from './components.jsx';
+import HighlightsSection from './components/HighlightsSection.jsx';
 import MembersView from './components/MembersView.jsx';
 import useDebounce from './hooks/useDebounce.js';
 import useTheme from './hooks/useTheme.js';
@@ -85,17 +86,23 @@ function App() {
       <Marquee />
       <MainNav view={view} onViewChange={setView} />
 
-      {view === 'members' ? <MembersView /> : (
+      {view === 'discography' && (
         <>
           <UnitTabs currentUnit={currentUnit} onUnitChange={setCurrentUnit} />
           <div className="track-count" aria-live="polite">
             Found {songs.length} tracks
           </div>
-          <main className="container">
-            {currentUnit === 'ALL' && (
-              <div id="highlights-placeholder" className="highlights-section" />
-            )}
+        </>
+      )}
+      <div
+        className={`container highlights-container${view === 'members' ? ' highlights-container-hidden' : ''}`}
+      >
+        <HighlightsSection visible={view === 'discography' && currentUnit === 'ALL'} />
+      </div>
 
+      {view === 'members' ? <MembersView /> : (
+        <>
+          <main className="container">
             {error && (
               <p className="request-error" role="alert">
                 {error}
