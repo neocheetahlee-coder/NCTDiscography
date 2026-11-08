@@ -1,0 +1,103 @@
+.card {
+  width: 100%;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.request-error,
+.empty-state {
+  color: var(--text-sub);
+  font-family: 'Geist Mono', monospace;
+}
+
+.request-error {
+  color: #c62828;
+}
+
+.members-view-header {
+  justify-content: space-between;
+  margin: 24px 0 20px;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.member-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#memberSortSelect {
+  background: linear-gradient(135deg, rgba(31, 217, 52, 0.85), rgba(14, 177, 42, 0.82));
+  color: #000;
+  font-weight: 700;
+  font-family: 'Geist Mono', monospace;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 8px 20px rgba(31, 217, 52, 0.22);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#memberSortSelect:hover {
+  transform: scale(1.04);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 12px 28px rgba(31, 217, 52, 0.28);
+}
+
+.member-photo-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 48px;
+}
+
+.member-instagram-icon,
+.member-solo-icon {
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.member-instagram-icon {
+  color: #e1306c;
+}
+
+.member-solo-icon {
+  color: #1fd934;
+}
+
+.member-modal-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-modal-photo-placeholder i {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 40px;
+}
+
+.member-modal-message,
+.members-empty,
+.members-error {
+  color: var(--text-sub);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+}
+
+.members-empty,
+.members-error {
+  grid-column: 1 / -1;
+}
+
+.members-error {
+  color: #c62828;
+  margin: 0 40px 12px;
+}
