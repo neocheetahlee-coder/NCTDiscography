@@ -13,6 +13,7 @@ import HighlightsSection from './components/HighlightsSection.jsx';
 import MembersView from './components/MembersView.jsx';
 import useDebounce from './hooks/useDebounce.js';
 import useTheme from './hooks/useTheme.js';
+import navigationGraph from './navigation/navigationGraph.js';
 import './styles/global.css';
 import './styles/app-overrides.css';
 
@@ -29,6 +30,11 @@ function App() {
   const debouncedSearch = useDebounce(search, 300);
   const [isDark, toggleTheme] = useTheme();
   const closeModal = useCallback(() => setSelectedSong(null), []);
+  const navigateToView = useCallback((targetView) => {
+    if (navigationGraph.findPath(view, targetView)) {
+      setView(targetView);
+    }
+  }, [view]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -84,7 +90,11 @@ function App() {
         showSongControls={view === 'discography'}
       />
       <Marquee />
-      <MainNav view={view} onViewChange={setView} />
+      <MainNav
+        view={view}
+        pages={navigationGraph.getPages()}
+        onViewChange={navigateToView}
+      />
 
       {view === 'discography' && (
         <>

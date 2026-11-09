@@ -107,27 +107,21 @@ export function Marquee() {
   );
 }
 
-export function MainNav({ view, onViewChange }) {
+export function MainNav({ view, pages, onViewChange }) {
   return (
     <nav className="main-nav" id="mainNav" aria-label="Main navigation">
-      <button
-        className={`main-nav-btn${view === 'discography' ? ' active' : ''}`}
-        id="navDiscography"
-        type="button"
-        aria-pressed={view === 'discography'}
-        onClick={() => onViewChange('discography')}
-      >
-        <i className="fa-solid fa-music" aria-hidden="true" /> Discography
-      </button>
-      <button
-        className={`main-nav-btn${view === 'members' ? ' active' : ''}`}
-        id="navMembers"
-        type="button"
-        aria-pressed={view === 'members'}
-        onClick={() => onViewChange('members')}
-      >
-        <i className="fa-solid fa-users" aria-hidden="true" /> Members
-      </button>
+      {pages.map((page) => (
+        <button
+          className={`main-nav-btn${view === page.id ? ' active' : ''}`}
+          id={`nav${page.id[0].toUpperCase()}${page.id.slice(1)}`}
+          key={page.id}
+          type="button"
+          aria-pressed={view === page.id}
+          onClick={() => onViewChange(page.id)}
+        >
+          <i className={`fa-solid ${page.icon}`} aria-hidden="true" /> {page.label}
+        </button>
+      ))}
     </nav>
   );
 }
