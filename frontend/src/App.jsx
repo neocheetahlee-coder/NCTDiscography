@@ -15,7 +15,7 @@ import useDebounce from './hooks/useDebounce.js';
 import useTheme from './hooks/useTheme.js';
 import './styles/global.css';
 import './styles/app-overrides.css';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 function App() {
   const [currentUnit, setCurrentUnit] = useState('ALL');
   const [search, setSearch] = useState('');
@@ -44,7 +44,7 @@ function App() {
       ].join('&');
 
       try {
-        const response = await fetch(`/api/songs?${query}`, {
+        const response = await fetch(`${API_BASE_URL}/api/songs?${query}`, {
           signal: controller.signal,
         });
         if (!response.ok) {
