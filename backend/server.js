@@ -15,22 +15,25 @@ let songLoadPromise = null;
 // ==========================================
 class SearchHashTable {
     constructor() {
-        this.table = {}; // ใช้ Object เป็น Hash Table
+        this.table = Object.create(null);
+        this.trackIdsByWord = Object.create(null);
     }
 
     // ฟังก์ชันสร้าง Index ข้อมูล (แยกคำจากชื่อเพลง, อัลบั้ม, ศิลปิน)
     buildIndex(songs) {
-        this.table = {}; 
+        this.table = Object.create(null);
+        this.trackIdsByWord = Object.create(null);
         songs.forEach(song => {
             // จับเอาคำทั้งหมดมาแยกด้วยช่องว่าง และทำให้เป็นตัวพิมพ์เล็ก
             const words = `${song.trackName} ${song.collectionName} ${song.artistName}`.toLowerCase().split(/\s+/);
             words.forEach(word => {
                 if (!this.table[word]) {
                     this.table[word] = [];
+                    this.trackIdsByWord[word] = new Set();
                 }
-                // ถ้ายังไม่มีเพลงนี้ใน array ของคำนั้น ให้เพิ่มเข้าไป
-                if (!this.table[word].some(s => s.trackId === song.trackId)) {
+                if (!this.trackIdsByWord[word].has(song.trackId)) {
                     this.table[word].push(song);
+                    this.trackIdsByWord[word].add(song.trackId);
                 }
             });
         });
@@ -58,7 +61,8 @@ const songDB = new SearchHashTable();
 // ==========================================
 // DSA 2: SORTING ALGORITHMS
 // ==========================================
-// Precompute sort keys so comparisons avoid repeatedly parsing dates or creating collators.
+// Heap Sort uses O(n log n) time and O(n) extra space for the precomputed keys.
+// Heap Sort is not stable; original indexes preserve the input order for equal keys.
 function customSort(arr, type) {
     if (!['az', 'za', 'newest', 'oldest'].includes(type)) {
         return [...arr];
@@ -75,7 +79,7 @@ function customSort(arr, type) {
             : song.trackName,
     }));
 
-    keyedSongs.sort((a, b) => {
+    const compare = (a, b) => {
         if (isDateSort) {
             const aIsValid = Number.isFinite(a.key);
             const bIsValid = Number.isFinite(b.key);
@@ -87,10 +91,137 @@ function customSort(arr, type) {
         }
 
         return a.index - b.index;
-    });
+    };
+
+    const siftDown = (heap, root, heapSize) => {
+        let current = root;
+        while (true) {
+            const left = 2 * current + 1;
+            const right = left + 1;
+            let largest = current;
+
+            if (left < heapSize && compare(heap[left], heap[largest]) > 0) {
+                largest = left;
+            }
+            if (right < heapSize && compare(heap[right], heap[largest]) > 0) {
+                largest = right;
+            }
+            if (largest === current) return;
+
+            [heap[current], heap[largest]] = [heap[largest], heap[current]];
+            current = largest;
+        }
+    };
+
+    // Build a max heap in O(n), then extract each maximum in O(log n).
+    for (let root = Math.floor(keyedSongs.length / 2) - 1; root >= 0; root--) {
+        siftDown(keyedSongs, root, keyedSongs.length);
+    }
+    for (let end = keyedSongs.length - 1; end > 0; end--) {
+        [keyedSongs[0], keyedSongs[end]] = [keyedSongs[end], keyedSongs[0]];
+        siftDown(keyedSongs, 0, end);
+    }
 
     return keyedSongs.map(({ song }) => song);
 }
+
+// Array-based min-heap. Each push and pop takes O(log n) time.
+class MinHeap {
+    constructor(compare) {
+        this.items = [];
+        this.compare = compare;
+    }
+
+    get size() {
+        return this.items.length;
+    }
+
+    peek() {
+        return this.items[0];
+    }
+
+    push(value) {
+        this.items.push(value);
+        this.siftUp(this.items.length - 1);
+    }
+
+    pop() {
+        if (this.items.length === 0) return undefined;
+        const minimum = this.items[0];
+        const last = this.items.pop();
+        if (this.items.length > 0) {
+            this.items[0] = last;
+            this.siftDown(0);
+        }
+        return minimum;
+    }
+
+    siftUp(index) {
+        let current = index;
+        while (current > 0) {
+            const parent = (current - 1) >> 1;
+            if (this.compare(this.items[current], this.items[parent]) >= 0) return;
+            [this.items[current], this.items[parent]] = [this.items[parent], this.items[current]];
+            current = parent;
+        }
+    }
+
+    siftDown(index) {
+        let current = index;
+        while (true) {
+            const left = 2 * current + 1;
+            const right = 2 * current + 2;
+            let smallest = current;
+
+            if (left < this.items.length &&
+                this.compare(this.items[left], this.items[smallest]) < 0) {
+                smallest = left;
+            }
+            if (right < this.items.length &&
+                this.compare(this.items[right], this.items[smallest]) < 0) {
+                smallest = right;
+            }
+            if (smallest === current) return;
+
+            [this.items[current], this.items[smallest]] = [this.items[smallest], this.items[current]];
+            current = smallest;
+        }
+    }
+}
+
+function getTopThreeNewestSongs(songs) {
+    // Keep at most three songs: O(n log 3) = O(n) time and O(1) extra space.
+    const compareRank = (a, b) => {
+        const aIsValid = Number.isFinite(a.timestamp);
+        const bIsValid = Number.isFinite(b.timestamp);
+        if (aIsValid !== bIsValid) return aIsValid ? 1 : -1;
+        if (aIsValid && a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+        return b.index - a.index;
+    };
+    const newestSongs = new MinHeap(compareRank);
+
+    songs.forEach((song, index) => {
+        const entry = {
+            song,
+            timestamp: new Date(song.releaseDate).getTime(),
+            index,
+        };
+        if (newestSongs.size < 3) {
+            newestSongs.push(entry);
+        } else if (compareRank(entry, newestSongs.peek()) > 0) {
+            newestSongs.pop();
+            newestSongs.push(entry);
+        }
+    });
+
+    const result = [];
+    while (newestSongs.size > 0) {
+        result.push(newestSongs.pop().song);
+    }
+    return result.reverse();
+}
+
+app.locals.customSort = customSort;
 
 // ==========================================
 // ดึงข้อมูลและจัดการ Routing
@@ -250,8 +381,7 @@ app.get('/api/songs', (req, res) => {
         results = customSort(results, sort);
     }
 
-    // จำลองระบบ Top 3 (จำลองโดยการเอา 3 อันดับแรกของผลลัพธ์)
-    const top3 = results.slice(0, 3);
+    const top3 = getTopThreeNewestSongs(results);
 
     res.json({ top3, songs: results });
 });
