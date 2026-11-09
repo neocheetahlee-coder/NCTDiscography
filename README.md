@@ -41,7 +41,7 @@
 ```
 App
 ├── Header
-│   ├── SearchInput (Debounced 300ms)
+│   ├── SearchInput 
 │   ├── SortSelect (Date / Name)
 │   └── ThemeToggle (Dark / Light Mode)
 ├── Marquee (Neo Culture Technology ticker)
