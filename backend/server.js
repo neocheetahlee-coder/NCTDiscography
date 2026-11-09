@@ -10,21 +10,18 @@ let allSongs = [];
 let songsLoaded = false;
 let songLoadPromise = null;
 
-// ==========================================
-// DSA 1: HASH TABLE (สำหรับระบบค้นหา)
-// ==========================================
+// ตารางแฮชสำหรับค้นหาเพลง
 class SearchHashTable {
     constructor() {
         this.table = Object.create(null);
         this.trackIdsByWord = Object.create(null);
     }
 
-    // ฟังก์ชันสร้าง Index ข้อมูล (แยกคำจากชื่อเพลง, อัลบั้ม, ศิลปิน)
+    // แยกคำจากชื่อเพลง อัลบั้ม และศิลปินเพื่อสร้างดัชนี
     buildIndex(songs) {
         this.table = Object.create(null);
         this.trackIdsByWord = Object.create(null);
         songs.forEach(song => {
-            // จับเอาคำทั้งหมดมาแยกด้วยช่องว่าง และทำให้เป็นตัวพิมพ์เล็ก
             const words = `${song.trackName} ${song.collectionName} ${song.artistName}`.toLowerCase().split(/\s+/);
             words.forEach(word => {
                 if (!this.table[word]) {
@@ -39,30 +36,25 @@ class SearchHashTable {
         });
     }
 
-    // ฟังก์ชันค้นหา O(1) - O(n)
+    // คำตรงค้นหาได้เฉลี่ย O(1); คำบางส่วนต้องไล่ตรวจทุกคำในดัชนี
     search(keyword) {
         const key = keyword.toLowerCase().trim();
-        // กรณีพิมพ์คำเป๊ะๆ (O(1))
         if (this.table[key]) return this.table[key];
         
-        // กรณีพิมพ์แค่บางส่วน (ต้องวนลูปหา)
         let results = [];
         for (let hashKey in this.table) {
             if (hashKey.includes(key)) {
                 results.push(...this.table[hashKey]);
             }
         }
-        // ลบข้อมูลซ้ำ
+        // คำค้นบางส่วนอาจพบเพลงเดียวกันหลายครั้ง
         return [...new Map(results.map(item => [item.trackId, item])).values()];
     }
 }
 const songDB = new SearchHashTable();
 
-// ==========================================
-// DSA 2: SORTING ALGORITHMS
-// ==========================================
-// Heap Sort uses O(n log n) time and O(n) extra space for the precomputed keys.
-// Heap Sort is not stable; original indexes preserve the input order for equal keys.
+// Heap Sort ใช้เวลา O(n log n) และพื้นที่ O(n) สำหรับคีย์ที่เตรียมไว้
+// อัลกอริทึมไม่ stable จึงใช้ index เดิมรักษาลำดับเมื่อคีย์เท่ากัน
 function customSort(arr, type) {
     if (!['az', 'za', 'newest', 'oldest'].includes(type)) {
         return [...arr];
@@ -71,6 +63,7 @@ function customSort(arr, type) {
     const isDateSort = type === 'newest' || type === 'oldest';
     const direction = type === 'za' || type === 'newest' ? -1 : 1;
     const collator = isDateSort ? null : new Intl.Collator();
+    // เตรียมชื่อหรือ timestamp ล่วงหน้า ไม่แปลงซ้ำระหว่างเปรียบเทียบ
     const keyedSongs = arr.map((song, index) => ({
         song,
         index,
@@ -113,7 +106,7 @@ function customSort(arr, type) {
         }
     };
 
-    // Build a max heap in O(n), then extract each maximum in O(log n).
+    // สร้าง max-heap ใช้ O(n) แล้วดึงค่าสูงสุดทีละตัว ใช้ O(log n) ต่อครั้ง
     for (let root = Math.floor(keyedSongs.length / 2) - 1; root >= 0; root--) {
         siftDown(keyedSongs, root, keyedSongs.length);
     }
@@ -125,7 +118,7 @@ function customSort(arr, type) {
     return keyedSongs.map(({ song }) => song);
 }
 
-// Array-based min-heap. Each push and pop takes O(log n) time.
+// Min-heap แบบ array: push และ pop ใช้เวลา O(log n)
 class MinHeap {
     constructor(compare) {
         this.items = [];
@@ -190,7 +183,7 @@ class MinHeap {
 }
 
 function getTopThreeNewestSongs(songs) {
-    // Keep at most three songs: O(n log 3) = O(n) time and O(1) extra space.
+    // เก็บเพียง 3 เพลง: ใช้เวลา O(n log 3) หรือ O(n) และพื้นที่ O(1)
     const compareRank = (a, b) => {
         const aIsValid = Number.isFinite(a.timestamp);
         const bIsValid = Number.isFinite(b.timestamp);
@@ -223,11 +216,8 @@ function getTopThreeNewestSongs(songs) {
 
 app.locals.customSort = customSort;
 
-// ==========================================
-// ดึงข้อมูลและจัดการ Routing
-// ==========================================
+// โหลดแคตตาล็อกจาก iTunes และลงดัชนีค้นหา
 async function fetchAppleMusicData() {
-    // Load each NCT unit in its existing store; WISH includes both Thai and Japanese catalogs.
     const responses = await Promise.all([
         fetch('https://itunes.apple.com/search?term=nct+127&entity=song&attribute=artistTerm&limit=200&country=TH'),
         fetch('https://itunes.apple.com/search?term=nct+dream&entity=song&attribute=artistTerm&limit=200&country=TH'),
@@ -272,7 +262,7 @@ function ensureSongsLoaded() {
     return songLoadPromise;
 }
 
-// Prime the song catalog on the first API call; failures are retried on the next request.
+// โหลดข้อมูลเมื่อมี API request แรก และลองใหม่ได้หากโหลดไม่สำเร็จ
 app.use('/api', async (req, res, next) => {
     try {
         await ensureSongsLoaded();
@@ -283,7 +273,7 @@ app.use('/api', async (req, res, next) => {
     }
 });
 
-// Endpoint ดึงข้อมูลสมาชิก NCT จาก members.json
+// ดึงข้อมูลสมาชิกและกรองตามยูนิต
 app.get('/api/members', (req, res) => {
     const { unit } = req.query;
     if (unit && unit !== 'ALL') {
@@ -361,22 +351,19 @@ app.get('/api/members/:id/solo-albums', async (req, res) => {
     }
 });
 
-// Endpoint ดึงข้อมูล (รองรับการค้นหา จัดเรียง และกรองยูนิต)
+// ค้นหา กรอง และจัดเรียงเพลง โดยคงรูปแบบ response เดิม
 app.get('/api/songs', (req, res) => {
     const { unit, sort, search } = req.query;
     let results = allSongs;
 
-    // 1. ค้นหาด้วย Hash Table
     if (search) {
         results = songDB.search(search);
     }
 
-    // 2. กรองตาม Unit
     if (unit && unit !== 'ALL') {
         results = results.filter(song => song.artistName.toUpperCase().includes(unit.toUpperCase()));
     }
 
-    // 3. จัดเรียงด้วยลอจิกที่เขียนเอง (Sorting)
     if (sort) {
         results = customSort(results, sort);
     }
