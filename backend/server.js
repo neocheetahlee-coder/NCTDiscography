@@ -58,37 +58,38 @@ const songDB = new SearchHashTable();
 // ==========================================
 // DSA 2: SORTING ALGORITHMS
 // ==========================================
-// เขีInsertion Sort เพื่อจัดเรียงเพลงตามชื่อเพลง (A-Z, Z-A) หรือวันที่วางจำหน่าย (ใหม่สุด, เก่าสุด)
+// Precompute sort keys so comparisons avoid repeatedly parsing dates or creating collators.
 function customSort(arr, type) {
-    let result = [...arr];
-    for (let i = 1; i < result.length; i++) {
-        let current = result[i];
-        let j = i - 1;
-
-        if (type === 'az') {
-            while (j >= 0 && result[j].trackName.localeCompare(current.trackName) > 0) {
-                result[j + 1] = result[j];
-                j--;
-            }
-        } else if (type === 'za') {
-            while (j >= 0 && result[j].trackName.localeCompare(current.trackName) < 0) {
-                result[j + 1] = result[j];
-                j--;
-            }
-        } else if (type === 'newest') {
-            while (j >= 0 && new Date(result[j].releaseDate) < new Date(current.releaseDate)) {
-                result[j + 1] = result[j];
-                j--;
-            }
-        } else if (type === 'oldest') {
-            while (j >= 0 && new Date(result[j].releaseDate) > new Date(current.releaseDate)) {
-                result[j + 1] = result[j];
-                j--;
-            }
-        }
-        result[j + 1] = current;
+    if (!['az', 'za', 'newest', 'oldest'].includes(type)) {
+        return [...arr];
     }
-    return result;
+
+    const isDateSort = type === 'newest' || type === 'oldest';
+    const direction = type === 'za' || type === 'newest' ? -1 : 1;
+    const collator = isDateSort ? null : new Intl.Collator();
+    const keyedSongs = arr.map((song, index) => ({
+        song,
+        index,
+        key: isDateSort
+            ? new Date(song.releaseDate).getTime()
+            : song.trackName,
+    }));
+
+    keyedSongs.sort((a, b) => {
+        if (isDateSort) {
+            const aIsValid = Number.isFinite(a.key);
+            const bIsValid = Number.isFinite(b.key);
+            if (aIsValid !== bIsValid) return aIsValid ? -1 : 1;
+            if (aIsValid && a.key !== b.key) return (a.key - b.key) * direction;
+        } else {
+            const comparison = collator.compare(a.key, b.key) * direction;
+            if (comparison !== 0) return comparison;
+        }
+
+        return a.index - b.index;
+    });
+
+    return keyedSongs.map(({ song }) => song);
 }
 
 // ==========================================
