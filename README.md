@@ -3,7 +3,7 @@
 > **วิชา:** 801201 การออกแบบอัลกอริทึมและการพัฒนาเว็บ (Algorithm Design and Web Development)  
 > **ใบงาน:** ต่อยอดงาน API ด้วย React-Vite + Express  
 > **Repository:** [neocheetahlee-coder/NCTDiscography](https://github.com/neocheetahlee-coder/NCTDiscography)  
-> **ลิงก์คลิปนำเสนอ:** `[ใส่ลิงก์คลิป YouTube ที่นี่]`
+> **ลิงก์คลิปนำเสนอ:** https://youtu.be/X8yl8N0I23o?si=lYjoIYwvnsCQ3W2K
 
 ---
 
