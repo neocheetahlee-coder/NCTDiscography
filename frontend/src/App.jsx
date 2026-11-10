@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  BackToTop,
-  Footer,
-  Header,
-  MainNav,
-  Marquee,
-  SongGrid,
-  SongModal,
-  UnitTabs,
-} from './components.jsx';
+import BackToTop from './components/BackToTop.jsx';
+import Footer from './components/Footer.jsx';
+import Header from './components/Header.jsx';
 import HighlightsSection from './components/HighlightsSection.jsx';
+import MainNav from './components/MainNav.jsx';
+import Marquee from './components/Marquee.jsx';
 import MembersView from './components/MembersView.jsx';
+import SongGrid from './components/SongGrid.jsx';
+import SongModal from './components/SongModal.jsx';
+import UnitTabs from './components/UnitTabs.jsx';
 import useDebounce from './hooks/useDebounce.js';
 import useTheme from './hooks/useTheme.js';
 import navigationGraph from './navigation/navigationGraph.js';
@@ -18,6 +16,7 @@ import './styles/global.css';
 import './styles/app-overrides.css';
 
 function App() {
+  // เก็บค่าตัวกรองและข้อมูลที่ใช้แสดงหน้า Discography
   const [currentUnit, setCurrentUnit] = useState('ALL');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
@@ -26,16 +25,21 @@ function App() {
   const [top3, setTop3] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // ควบคุมเพลงที่เลือกเปิดใน modal และสถานะธีม
   const [selectedSong, setSelectedSong] = useState(null);
   const debouncedSearch = useDebounce(search, 300);
   const [isDark, toggleTheme] = useTheme();
   const closeModal = useCallback(() => setSelectedSong(null), []);
+
+  // เปลี่ยนหน้าได้เมื่อมีเส้นทางเชื่อมถึงกันใน navigation graph
   const navigateToView = useCallback((targetView) => {
     if (navigationGraph.findPath(view, targetView)) {
       setView(targetView);
     }
   }, [view]);
 
+  // โหลดเพลงใหม่เมื่อเปลี่ยนยูนิต การเรียง หรือคำค้นหา
   useEffect(() => {
     const controller = new AbortController();
 
@@ -43,6 +47,7 @@ function App() {
       setLoading(true);
       setError('');
 
+      // เข้ารหัสค่าก่อนประกอบเป็น query string
       const query = [
         `unit=${encodeURIComponent(currentUnit)}`,
         `sort=${encodeURIComponent(sort)}`,
@@ -61,6 +66,7 @@ function App() {
         if (!Array.isArray(data.songs) || !Array.isArray(data.top3)) {
           throw new Error('The songs response has an invalid format');
         }
+        // อัปเดตเพลงทั้งหมดและอันดับ 3 จาก API
         setSongs(data.songs);
         setTop3(data.top3);
       } catch (fetchError) {
@@ -75,11 +81,13 @@ function App() {
     }
 
     fetchData();
+    // ยกเลิก request เก่าเมื่อ dependencies เปลี่ยนหรือ component ถูกถอดออก
     return () => controller.abort();
   }, [currentUnit, sort, debouncedSearch]);
 
   return (
     <>
+      {/* ส่วนหัวรวมช่องค้นหา ตัวเลือกเรียง และสลับธีม */}
       <Header
         search={search}
         onSearchChange={setSearch}
@@ -90,12 +98,14 @@ function App() {
         showSongControls={view === 'discography'}
       />
       <Marquee />
+      {/* เมนูหลักรับรายการหน้าและเส้นทางจาก navigation graph */}
       <MainNav
         view={view}
         pages={navigationGraph.getPages()}
         onViewChange={navigateToView}
       />
 
+      {/* ตัวกรองยูนิตและจำนวนเพลงแสดงเฉพาะหน้า Discography */}
       {view === 'discography' && (
         <>
           <UnitTabs currentUnit={currentUnit} onUnitChange={setCurrentUnit} />
@@ -107,9 +117,11 @@ function App() {
       <div
         className={`container highlights-container${view === 'members' ? ' highlights-container-hidden' : ''}`}
       >
+        {/* ซ่อน Highlights เมื่อเลือกหน้า Members หรือกรองเฉพาะยูนิต */}
         <HighlightsSection visible={view === 'discography' && currentUnit === 'ALL'} />
       </div>
 
+      {/* เลือกแสดงหน้าสมาชิกหรือรายการเพลงตามเมนูที่ใช้งาน */}
       {view === 'members' ? <MembersView /> : (
         <>
           <main className="container">
@@ -137,6 +149,7 @@ function App() {
         </>
       )}
 
+      {/* modal เพลงและส่วนท้ายที่ใช้ร่วมกันทุกหน้า */}
       <SongModal song={selectedSong} onClose={closeModal} />
       <Footer />
       <BackToTop />
